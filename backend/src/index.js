@@ -1,5 +1,4 @@
 import express from "express"
-import mongoose from "mongoose"
 import cors from "cors"
 import connectDB from "./db.js"
 import dotenv from "dotenv"
@@ -12,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/",(req,res)=>{
-    res.send("Linklytics is working")
+    res.send("Linklytics is running!")
 });
 
 const PORT = process.env.PORT||8000
