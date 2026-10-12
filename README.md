@@ -1,59 +1,57 @@
 # Linklytics
 
-Linklytics is a deployed full-stack URL shortener. Its React dashboard creates and lists short links, while an Express API backed by MongoDB stores URL records, redirects visitors, and tracks click totals.
+Linklytics is a full-stack URL shortener with a React dashboard and an Express API. Users can create short links, view saved URLs and click totals, copy short URLs, and redirect visitors to the original destinations. URL records are stored in MongoDB.
 
-## Live demo
+## Live Demo
 
-- **Frontend (Netlify):** [https://linklytics-v.netlify.app](https://linklytics-v.netlify.app/)
-- **Backend (Render):** [https://linklytics-api-cwzx.onrender.com](https://linklytics-api-cwzx.onrender.com/)
+- **Frontend (Netlify):** [Linklytics](https://linklytics-v.netlify.app/)
+- **Backend (Render):** [Linklytics API](https://linklytics-api-cwzx.onrender.com)
 
-> The Netlify URL was not present in the repository and needs to be filled in with the deployed site address.
->
-> If the Render service is on a plan that sleeps after inactivity, its first request after an idle period may take longer while the service starts.
+> The hosted backend may take longer to respond to the first request after an idle period, depending on the Render service plan.
 
 ## Features
 
-- Create short URLs from validated HTTP and HTTPS destinations.
+- Create short URLs from valid HTTP and HTTPS destinations.
 - Generate unique seven-character short codes.
 - Redirect short URLs to their original destinations.
-- Increment and persist each URL's click count when its short URL is visited.
-- Store URL creation and update timestamps, and display the creation date in the dashboard.
-- Display saved URL records, total link count, and the sum of link click counts.
-- Copy newly created short URLs.
-- Refresh the dashboard link list when its tab becomes visible.
-- Provide loading, empty, validation, success, and error states in the frontend.
+- Increment and persist a URL's click count when its short URL is visited.
+- Store URL creation and update timestamps, and display creation dates in the dashboard.
+- Display saved URL records, total links, and the sum of recorded link clicks.
+- Copy generated short URLs.
+- Refresh the link list when the browser tab becomes visible again.
+- Show loading, empty, validation, success, and error states in the frontend.
 
-The backend includes a click model with a `clickedAt` field, but the redirect handler does not currently create click records. Per-click timestamps or click-history analytics are therefore not implemented; the timestamps currently displayed belong to URL records.
+**Click-tracking limitation:** The backend contains a click model with a `clickedAt` field, but the current redirect handler does not create individual click records. Click totals are stored on each URL record; per-click history and per-click timestamp analytics are not currently implemented.
 
 ## Architecture
 
 - **Frontend:** React and Vite dashboard hosted on Netlify.
 - **Backend:** Node.js and Express API hosted on Render.
-- **Persistence:** MongoDB Atlas stores URL records.
+- **Database:** MongoDB Atlas stores URL records.
 
-The frontend sends API requests to the configured backend origin. The backend validates and stores URLs in MongoDB, then serves redirect requests by looking up the short code, incrementing the stored click count, and redirecting to the destination.
+The frontend sends requests to the configured backend origin. The backend validates and stores URLs, looks up short codes during redirects, increments the stored click count, and redirects visitors to the original destination.
 
-## Technology stack
+## Technology Stack
 
-**Frontend**
+### Frontend
 
 - React 19 and React DOM
 - Vite 8
 - Tailwind CSS 4 with the Tailwind Vite plugin
 - ESLint
 
-**Backend**
+### Backend
 
-- Node.js with Express 5
-- MongoDB with Mongoose 9
+- Node.js and Express 5
+- MongoDB and Mongoose 9
 - `nanoid` for short-code generation
-- `dotenv` for backend environment configuration
+- `dotenv` for environment configuration
 - `cors` for cross-origin API requests
 - `nodemon` for backend development
 
-Versions reflect the dependencies in the frontend and backend package manifests.
+Versions reflect the dependencies declared in the frontend and backend package manifests.
 
-## Project structure
+## Project Structure
 
 ```text
 Linklytics/
@@ -94,23 +92,23 @@ Linklytics/
 
 ## Prerequisites
 
-- Node.js and npm compatible with the dependencies declared in both package manifests.
-- A MongoDB Atlas cluster (or another reachable MongoDB instance) and its connection URI.
+- Node.js and npm compatible with the versions and dependencies in the project.
+- A MongoDB Atlas cluster, or another MongoDB instance accessible to the backend.
 
-## Environment variables
+## Environment Variables
 
-Keep environment files local and never commit database credentials or secrets.
+Keep environment files local. Never commit database credentials or other secrets.
 
 ### Backend
 
-Create `backend/.env`:
+Create `backend/.env` for local development:
 
 ```dotenv
 PORT=8000
-MONGODB_URI=<YOUR_MONGODB_ATLAS_CONNECTION_URI>
+MONGODB_URI=<YOUR_MONGODB_CONNECTION_URI>
 ```
 
-`PORT` is optional; the backend defaults to `8000`. Set `MONGODB_URI` to the connection URI from your own MongoDB Atlas cluster. Keep the real URI private. In the deployed Render service, configure these variables in the service's environment settings instead of placing credentials in source control.
+`MONGODB_URI` must contain the connection URI for your own MongoDB instance. `PORT` is optional; the backend defaults to port `8000` if it is not set. In the deployed Render service, configure the environment variables in the service settings instead of committing credentials to source control.
 
 ### Frontend
 
@@ -120,17 +118,17 @@ Create `frontend/.env.local` for local development:
 VITE_API_BASE_URL=http://localhost:8000
 ```
 
-For the deployed Netlify site, set `VITE_API_BASE_URL` in the site's environment variables to:
+For the deployed Netlify site, set `VITE_API_BASE_URL` to the backend origin:
 
 ```text
 https://linklytics-api-cwzx.onrender.com
 ```
 
-Use only the backend origin; the frontend appends `/api/v1/urls` for API calls and the short code for redirects. Vite variables prefixed with `VITE_` are included in frontend code, so this value must not contain secrets. Rebuild/redeploy the frontend after changing its environment value.
+Use only the origin; do not append `/api/v1/urls`, because the frontend builds the API path itself. Vite variables prefixed with `VITE_` are included in client-side code, so do not put secrets in them. Rebuild and redeploy the frontend after changing this value.
 
-## Local installation and setup
+## Installation
 
-Install backend and frontend dependencies separately:
+Install the dependencies separately for the backend and frontend:
 
 ```sh
 cd backend
@@ -139,29 +137,25 @@ cd ../frontend
 npm install
 ```
 
-Configure `backend/.env` and `frontend/.env.local` as shown above. Ensure the MongoDB URI points to an accessible database and the frontend API origin matches the backend host and port.
+Configure `backend/.env` and `frontend/.env.local` as described above. Ensure the MongoDB URI points to an accessible database and that the frontend API origin matches the backend host and port.
 
-## Run locally
+## Run Locally
 
-In one terminal, start the backend from `backend/`:
-
-```sh
-npm run dev
-```
-
-This runs `nodemon src/index.js`. To start without the development watcher, use:
-
-```sh
-npm start
-```
-
-In a separate terminal, start the frontend from `frontend/`:
+Start the backend from the `backend/` directory:
 
 ```sh
 npm run dev
 ```
 
-Open the local URL printed by Vite. URL creation, listing, and redirects require the backend to be running and connected to MongoDB.
+This runs `nodemon src/index.js`. To start the backend without the development watcher, run `npm start` from the same directory.
+
+In a second terminal, start the frontend from the `frontend/` directory:
+
+```sh
+npm run dev
+```
+
+Open the local URL printed by Vite. Creating and listing URLs, and redirecting short links, require the backend to be running and connected to MongoDB.
 
 Available frontend scripts, run from `frontend/`:
 
@@ -172,24 +166,24 @@ npm run build
 npm run preview
 ```
 
-`preview` serves the production build locally; run `npm run build` first.
+Run `npm run build` before `npm run preview`; the preview command serves the generated production build locally.
 
-## How URL creation and clicks work
+## How URL Creation and Click Counting Work
 
-1. The dashboard checks that the destination is a valid HTTP or HTTPS URL.
-2. The frontend sends the destination as `originalUrl` to the backend.
-3. The backend validates the URL, generates a seven-character short code, and saves the URL document.
-4. The dashboard shows the generated short URL using the configured backend origin.
-5. When a visitor opens `/<shortCode>`, the backend finds the URL, increments and saves `clickCount`, then redirects to `originalUrl`.
-6. The dashboard obtains URL records from the list API and derives its total-click statistic by summing the records' click counts. It requests the list again when its tab becomes visible.
+1. The dashboard validates that the destination uses HTTP or HTTPS.
+2. The frontend sends the destination in the `originalUrl` field to the backend.
+3. The backend validates the URL, generates a seven-character short code, and saves a URL document.
+4. The dashboard displays the generated short URL using the configured backend origin.
+5. When a visitor opens `/<shortCode>`, the backend looks up the URL, increments and saves `clickCount`, then redirects to `originalUrl`.
+6. The dashboard loads URL records from the list endpoint and calculates the total click statistic by summing their click counts. It requests the list again when the browser tab becomes visible.
 
 Each URL document includes Mongoose `createdAt` and `updatedAt` timestamps. Clicks are counted on the URL document; individual click events and click timestamps are not currently recorded by the redirect handler.
 
-## API
+## API Reference
 
-The backend origin is `https://linklytics-api-cwzx.onrender.com` when deployed. The API is mounted under `/api/v1/urls`.
+The deployed backend origin is `https://linklytics-api-cwzx.onrender.com`. The JSON API is mounted under `/api/v1/urls`.
 
-Successful JSON API responses use this envelope:
+Successful JSON API responses follow this envelope:
 
 ```json
 {
@@ -200,7 +194,7 @@ Successful JSON API responses use this envelope:
 }
 ```
 
-### Create a short URL
+### Create a Short URL
 
 `POST /api/v1/urls`
 
@@ -212,29 +206,33 @@ Request body:
 }
 ```
 
-Returns HTTP `201`. `data` is the created URL document, including `originalUrl`, `shortCode`, `clickCount`, `createdAt`, `updatedAt`, and its MongoDB `_id`.
+Returns HTTP `201`. The `data` field contains the created URL document, including `originalUrl`, `shortCode`, `clickCount`, `createdAt`, `updatedAt`, and MongoDB's `_id`.
 
 ### List URLs
 
 `GET /api/v1/urls`
 
-Returns HTTP `200`. `data` is an array of URL documents with the same fields as the create response.
+Returns HTTP `200`. The `data` field contains an array of URL documents with the same fields as the create response.
 
-### Redirect to a destination
+### Redirect to a Destination
 
 `GET /:shortCode`
 
-For an existing code, the backend increments and saves its `clickCount`, then responds with an HTTP redirect to the original URL. This route returns a redirect, not the JSON API response envelope.
+For an existing code, the backend increments and saves its `clickCount`, then responds with an HTTP redirect to the original URL. This route returns a redirect rather than the JSON API response envelope.
 
-### Backend status
+### Backend Status
 
 `GET /`
 
-Returns the plain-text response `Linklytics is running!`.
+Returns the plain-text response:
 
-## Error handling
+```text
+Linklytics is running!
+```
 
-JSON API errors use this shape:
+## Error Handling
+
+JSON API errors use this response shape:
 
 ```json
 {
@@ -245,16 +243,15 @@ JSON API errors use this shape:
 }
 ```
 
-URL creation returns HTTP `400` when `originalUrl` is missing, malformed, or uses a protocol other than HTTP or HTTPS. An unknown short code returns HTTP `404`. Other handled errors use their supplied status code or default to HTTP `500`.
+URL creation returns HTTP `400` when `originalUrl` is missing, malformed, or uses a protocol other than HTTP or HTTPS. An unknown short code returns HTTP `404`. Other handled errors use their specified status code or default to HTTP `500`.
 
-The frontend displays API error messages and provides a retry action when it cannot load the link list. It also validates the URL before submission and reports success after creating a link.
+The frontend displays API error messages and provides a retry action when it cannot load the URL list. It also validates the destination before submission and reports success after creating a short link.
 
-## Planned improvements
+## Possible Future Improvements
 
-These are possible future enhancements, not currently implemented:
+These are ideas for future development and are not currently implemented:
 
-- Add authentication and per-user link ownership.
-- Add link editing and deletion endpoints and dashboard controls.
-- Add search, filtering, and pagination for larger link lists.
-- Add automated tests for API routes and frontend states.
-- Record per-click timestamps and display click-history analytics.
+- Store individual click events and timestamps for click-history analytics.
+- Add per-link analytics views and visualizations.
+- Add user accounts and private link management.
+`
