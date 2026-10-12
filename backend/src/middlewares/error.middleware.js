@@ -1,5 +1,3 @@
-import { ApiError } from "../utils/ApiError.js";
-
 const errorMiddleware = (err,req,res,next)=>{
     const statusCode = err.statusCode||500
 
